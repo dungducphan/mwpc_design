@@ -44,4 +44,9 @@ The first time you start up the Qucs-S program, a dialog will open to ask you to
 ## Circuit simulation with Qucs-S
 
 
+# Notes on OPA656 models
+Notations:
+- sbomb195: TINA-TI SPICE model.
+- sbom136b: PSPICE model.
+
 
