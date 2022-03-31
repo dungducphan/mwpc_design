@@ -1,0 +1,70 @@
+// Define mesh boundary
+int C = 1;
+int D = 2;
+int nx = 1000;
+int ny = 100;
+int m = 50;
+border Gamma1(t=1, 0){x=10*t;    y=1;   label=C;}
+border Gamma2(t=1, 0){x=10;      y=1-t; label=C;}
+border Gamma3(t=1, 0){x=10-
+  10*t; y=0;   label=C;}
+border Gamma4(t=1, 0){x=0;       y=t;   label=C;}
+
+real radius = 0.1;
+border GammaP1(t=2.*pi, 0){x=1+radius*cos(t);  y=0.5+radius*sin(t); label=D;}
+border GammaP2(t=2.*pi, 0){x=2+radius*cos(t);  y=0.5+radius*sin(t); label=D;}
+border GammaP3(t=2.*pi, 0){x=3+radius*cos(t);  y=0.5+radius*sin(t); label=D;}
+border GammaP4(t=2.*pi, 0){x=4+radius*cos(t);  y=0.5+radius*sin(t); label=D;}
+border GammaP5(t=2.*pi, 0){x=5+radius*cos(t);  y=0.5+radius*sin(t); label=D;}
+border GammaP6(t=2.*pi, 0){x=6+radius*cos(t);  y=0.5+radius*sin(t); label=D;}
+border GammaP7(t=2.*pi, 0){x=7+radius*cos(t);  y=0.5+radius*sin(t); label=D;}
+border GammaP8(t=2.*pi, 0){x=8+radius*cos(t);  y=0.5+radius*sin(t); label=D;}
+border GammaP9(t=2.*pi, 0){x=9+radius*cos(t);  y=0.5+radius*sin(t); label=D;}
+
+// The triangulated domain Th is on the left side of its boundary
+mesh Th = buildmesh(Gamma1(nx) +
+                    Gamma2(ny) +
+                    Gamma3(nx) +
+                    Gamma4(ny) +
+                    GammaP1(m) +
+                    GammaP2(m) +
+                    GammaP3(m) +
+                    GammaP4(m) +
+                    GammaP5(m) +
+                    GammaP6(m) +
+                    GammaP7(m) +
+                    GammaP8(m) +
+                    GammaP9(m));
+
+plot(Th, wait=1);
+
+// The finite element space defined over Th is called here Vh
+fespace Vh(Th, P2);
+Vh u, v;// Define u and v as piecewise-P1 continuous functions
+
+// Define a function f
+func f=0;
+
+// Get the clock in second
+real cpu=clock();
+
+// Define the PDE
+solve Laplace(u, v)
+    = int2d(Th)(    // The bilinear part
+          dx(u)*dx(v)
+        + dy(u)*dy(v)
+    )
+    - int2d(Th)(    // The right hand side
+          f*v
+    )
+    + on(C, u=-10000)
+    + on(D, u=0);
+
+// Plot the result
+load "iovtk"
+int[int] Order = [1];
+savevtk("u.vtu", Th, u, dataname="u", order=Order);
+plot(u, wait=1);
+
+// Display the total computational time
+cout << "CPU time = " << (clock()-cpu) << endl;
